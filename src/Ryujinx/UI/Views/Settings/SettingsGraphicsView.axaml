@@ -89,6 +89,15 @@
                             ToolTip.Tip="{ext:Locale SettingsEnableTextureRecompressionTooltip}">
                             <TextBlock Text="{ext:Locale SettingsEnableTextureRecompression}" />
                         </CheckBox>
+                        <CheckBox IsChecked="{Binding EnableAstcPassthrough}"
+                            ToolTip.Tip="{ext:Locale SettingsEnableAstcPassthroughTooltip}">
+                            <TextBlock Text="{ext:Locale SettingsEnableAstcPassthrough}" />
+                        </CheckBox>
+                        <CheckBox IsChecked="{Binding ShowMetalHud}"
+                                  IsVisible="{Binding ColorSpacePassthroughAvailable}"
+                            ToolTip.Tip="{ext:Locale SettingsShowMetalHudTooltip}">
+                            <TextBlock Text="{ext:Locale SettingsShowMetalHud}" />
+                        </CheckBox>
                         <CheckBox IsChecked="{Binding EnableMacroHLE}"
                             ToolTip.Tip="{ext:Locale SettingsEnableMacroHLETooltip}">
                             <TextBlock Text="{ext:Locale SettingsEnableMacroHLE}" />

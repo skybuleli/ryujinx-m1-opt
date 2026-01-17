@@ -570,6 +570,8 @@ namespace Ryujinx.Ava.UI.Windows
             GraphicsConfig.ShadersDumpPath            = ConfigurationState.Instance.Graphics.ShadersDumpPath;
             GraphicsConfig.EnableShaderCache          = ConfigurationState.Instance.Graphics.EnableShaderCache;
             GraphicsConfig.EnableTextureRecompression = ConfigurationState.Instance.Graphics.EnableTextureRecompression;
+            GraphicsConfig.EnableAstcPassthrough      = ConfigurationState.Instance.Graphics.EnableAstcPassthrough;
+            GraphicsConfig.ShowMetalHud               = ConfigurationState.Instance.Graphics.ShowMetalHud;
             GraphicsConfig.EnableMacroHLE             = ConfigurationState.Instance.Graphics.EnableMacroHLE;
 #pragma warning restore IDE0055
         }

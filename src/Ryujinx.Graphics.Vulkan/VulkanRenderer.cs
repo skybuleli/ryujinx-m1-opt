@@ -709,6 +709,14 @@ namespace Ryujinx.Graphics.Vulkan
                 Format.Astc12x10Srgb,
                 Format.Astc12x12Srgb);
 
+            if (!supportsAstcFormats && IsMoltenVk)
+            {
+                // MoltenVK may not support all ASTC formats with all features, but we can still use it.
+                supportsAstcFormats = FormatCapabilities.OptimalFormatsSupport(compressedFormatFeatureFlags & ~FormatFeatureFlags.SampledImageFilterLinearBit,
+                    Format.Astc4x4Unorm,
+                    Format.Astc8x8Unorm);
+            }
+
             PhysicalDeviceVulkan12Features featuresVk12 = new()
             {
                 SType = StructureType.PhysicalDeviceVulkan12Features,

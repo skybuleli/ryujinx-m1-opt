@@ -280,6 +280,7 @@ namespace Ryujinx.Headless
             // Setup graphics configuration
             GraphicsConfig.EnableShaderCache = !option.DisableShaderCache;
             GraphicsConfig.EnableTextureRecompression = option.EnableTextureRecompression;
+            GraphicsConfig.EnableAstcPassthrough = option.EnableAstcPassthrough;
             GraphicsConfig.ResScale = option.ResScale;
             GraphicsConfig.MaxAnisotropy = option.MaxAnisotropy;
             GraphicsConfig.ShadersDumpPath = option.GraphicsShadersDumpPath;

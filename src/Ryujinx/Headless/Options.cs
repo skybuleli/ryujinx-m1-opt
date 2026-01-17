@@ -55,6 +55,9 @@ namespace Ryujinx.Headless
             if (NeedsOverride(nameof(EnableTextureRecompression)))
                 EnableTextureRecompression = configurationState.Graphics.EnableTextureRecompression;
 
+            if (NeedsOverride(nameof(EnableAstcPassthrough)))
+                EnableAstcPassthrough = configurationState.Graphics.EnableAstcPassthrough;
+
             if (NeedsOverride(nameof(DisableDockedMode)))
                 DisableDockedMode = !configurationState.System.EnableDockedMode;
 
@@ -314,6 +317,9 @@ namespace Ryujinx.Headless
 
         [Option("enable-texture-recompression", Required = false, Default = false, HelpText = "Enables Texture recompression.")]
         public bool EnableTextureRecompression { get; set; }
+
+        [Option("enable-astc-passthrough", Required = false, Default = false, HelpText = "Enables ASTC hardware passthrough.")]
+        public bool EnableAstcPassthrough { get; set; }
 
         [Option("disable-docked-mode", Required = false, HelpText = "Disables Docked Mode.")]
         public bool DisableDockedMode { get; set; }

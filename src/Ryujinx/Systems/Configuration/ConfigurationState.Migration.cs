@@ -82,6 +82,8 @@ namespace Ryujinx.Ava.Systems.Configuration
             Graphics.CustomVSyncInterval.Value = cff.CustomVSyncInterval;
             Graphics.EnableShaderCache.Value = cff.EnableShaderCache;
             Graphics.EnableTextureRecompression.Value = cff.EnableTextureRecompression;
+            Graphics.EnableAstcPassthrough.Value = cff.EnableAstcPassthrough;
+            Graphics.ShowMetalHud.Value = cff.ShowMetalHud;
             Graphics.EnableMacroHLE.Value = cff.EnableMacroHLE;
             Graphics.EnableColorSpacePassthrough.Value = cff.EnableColorSpacePassthrough;
 

@@ -70,6 +70,8 @@ namespace Ryujinx.Ava.Systems.Configuration
                 CustomVSyncInterval = Graphics.CustomVSyncInterval,
                 EnableShaderCache = Graphics.EnableShaderCache,
                 EnableTextureRecompression = Graphics.EnableTextureRecompression,
+                EnableAstcPassthrough = Graphics.EnableAstcPassthrough,
+                ShowMetalHud = Graphics.ShowMetalHud,
                 EnableMacroHLE = Graphics.EnableMacroHLE,
                 EnableColorSpacePassthrough = Graphics.EnableColorSpacePassthrough,
                 EnablePtc = System.EnablePtc,
@@ -198,6 +200,8 @@ namespace Ryujinx.Ava.Systems.Configuration
             Graphics.EnableCustomVSyncInterval.Value = false;
             Graphics.EnableShaderCache.Value = true;
             Graphics.EnableTextureRecompression.Value = false;
+            Graphics.EnableAstcPassthrough.Value = true;
+            Graphics.ShowMetalHud.Value = true;
             Graphics.EnableMacroHLE.Value = true;
             Graphics.EnableColorSpacePassthrough.Value = false;
             Graphics.AntiAliasing.Value = AntiAliasing.None;

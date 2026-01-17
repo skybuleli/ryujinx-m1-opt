@@ -244,14 +244,12 @@ namespace Ryujinx.Ava.Systems.Configuration
         /// </summary>
         public bool EnableShaderCache { get; set; }
 
-        /// <summary>
-        /// Enables or disables texture recompression
-        /// </summary>
         public bool EnableTextureRecompression { get; set; }
 
-        /// <summary>
-        /// Enables or disables Macro high-level emulation
-        /// </summary>
+        public bool EnableAstcPassthrough { get; set; }
+
+        public bool ShowMetalHud { get; set; }
+
         public bool EnableMacroHLE { get; set; }
 
         /// <summary>

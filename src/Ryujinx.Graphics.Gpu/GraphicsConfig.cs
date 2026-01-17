@@ -68,6 +68,16 @@ namespace Ryujinx.Graphics.Gpu
         public static bool EnableTextureRecompression { get; set; } = false;
 
         /// <summary>
+        /// Enables or disables ASTC hardware passthrough.
+        /// </summary>
+        public static bool EnableAstcPassthrough { get; set; } = false;
+
+        /// <summary>
+        /// Enables or disables the Metal Performance HUD (macOS only).
+        /// </summary>
+        public static bool ShowMetalHud { get; set; } = false;
+
+        /// <summary>
         /// Enables or disables color space passthrough, if available.
         /// </summary>
         public static bool EnableColorSpacePassthrough { get; set; } = false;

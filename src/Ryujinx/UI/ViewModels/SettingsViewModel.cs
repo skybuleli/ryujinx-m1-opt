@@ -254,6 +254,8 @@ namespace Ryujinx.Ava.UI.ViewModels
         public MemoryConfiguration DramSize { get; set; }
         public bool EnableShaderCache { get; set; }
         public bool EnableTextureRecompression { get; set; }
+        public bool EnableAstcPassthrough { get; set; }
+        public bool ShowMetalHud { get; set; }
         public bool EnableMacroHLE { get; set; }
         public bool EnableColorSpacePassthrough { get; set; }
         public bool ColorSpacePassthroughAvailable => RunningPlatform.IsMacOS;
@@ -680,6 +682,8 @@ namespace Ryujinx.Ava.UI.ViewModels
             // Physical devices are queried asynchronously hence the preferred index config value is loaded in LoadAvailableGpus().
             EnableShaderCache = config.Graphics.EnableShaderCache;
             EnableTextureRecompression = config.Graphics.EnableTextureRecompression;
+            EnableAstcPassthrough = config.Graphics.EnableAstcPassthrough;
+            ShowMetalHud = config.Graphics.ShowMetalHud;
             EnableMacroHLE = config.Graphics.EnableMacroHLE;
             EnableColorSpacePassthrough = config.Graphics.EnableColorSpacePassthrough;
             ResolutionScale = config.Graphics.ResScale == -1 ? 4 : config.Graphics.ResScale - 1;
@@ -794,6 +798,8 @@ namespace Ryujinx.Ava.UI.ViewModels
             config.Graphics.PreferredGpu.Value = _gpuIds.ElementAtOrDefault(PreferredGpuIndex);
             config.Graphics.EnableShaderCache.Value = EnableShaderCache;
             config.Graphics.EnableTextureRecompression.Value = EnableTextureRecompression;
+            config.Graphics.EnableAstcPassthrough.Value = EnableAstcPassthrough;
+            config.Graphics.ShowMetalHud.Value = ShowMetalHud;
             config.Graphics.EnableMacroHLE.Value = EnableMacroHLE;
             config.Graphics.EnableColorSpacePassthrough.Value = EnableColorSpacePassthrough;
             config.Graphics.ResScale.Value = ResolutionScale == 4 ? -1 : ResolutionScale + 1;

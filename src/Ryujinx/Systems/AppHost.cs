@@ -933,6 +933,13 @@ namespace Ryujinx.Ava.Systems
             // Initialize Renderer.
             GraphicsBackend backend = ConfigurationState.Instance.Graphics.GraphicsBackend;
 
+            Logger.Info?.Print(LogClass.Gpu, $"Backend: {backend}");
+
+            if (OperatingSystem.IsMacOS() && ConfigurationState.Instance.Graphics.ShowMetalHud.Value)
+            {
+                Environment.SetEnvironmentVariable("MTL_HUD_ENABLED", "1");
+            }
+
             IRenderer renderer = backend switch
             {
                 GraphicsBackend.Vulkan => VulkanRenderer.Create(

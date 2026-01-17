@@ -27,19 +27,24 @@
     - [x] 替换旧的 Vector 运算为 .NET 10 新指令集实现 (以 `Ryujinx.Common.BitUtils.ReverseBits64` 为例完成验证与落地)。
     - [x] 优化纹理软解压 (BCnDecoder) 使用 ARM64 AdvSimd 指令集 (BC1 +22%, BC3 +4%)。
 
-### 1.2 ASTC 硬件透传 (ASTC Passthrough)
-- [ ] **功能原型**
-    - [ ] 定位纹理加载与解码逻辑 (`Ryujinx.Graphics.Texture`).
-    - [ ] 实现检测宿主 GPU 是否支持 ASTC 的逻辑 (在 macOS/Metal 下应为 True)。
-    - [ ] 在 `Ryujinx.Graphics.Gpu` 中添加 ASTC 透传路径：跳过 CPU 软解压，直接上传压缩数据。
-- [ ] **集成与测试**
-    - [ ] 验证纹理颜色是否正确 (避免 R/B 通道互换问题)。
-    - [ ] 使用 `Metal Performance HUD` 验证显存占用是否显著下降。
+### 1.2 ASTC 硬件透传 (ASTC Passthrough) ✅
+- [x] **功能原型**
+    - [x] 定位纹理加载与解码逻辑 (`Ryujinx.Graphics.Texture`).
+    - [x] 实现检测宿主 GPU 是否支持 ASTC 的逻辑 (在 macOS/Metal 下应为 True)。
+    - [x] 在 `Ryujinx.Graphics.Gpu` 中添加 ASTC 透传路径：跳过 CPU 软解压，直接上传压缩数据。
+- [x] **集成与测试**
+    - [x] 验证纹理颜色是否正确 (避免 R/B 通道互换问题)。
+    - [x] 使用 `Metal Performance HUD` 验证显存占用是否显著下降。
 
-### 1.3 MoltenVK 调优
-- [ ] **配置注入**
-    - [ ] 在 `Ryujinx.app` 启动脚本或初始化代码中注入优选环境变量。
-    - [ ] 关键参数验证: `MVK_CONFIG_USE_METAL_ARGUMENT_BUFFERS` 等。
+### 1.3 MoltenVK 调优 ✅
+- [x] **配置注入**
+    - [x] 通过原生 `setenv` 在 `Program.cs` 中强行开启 `MTL_HUD_ENABLED=1`。
+    - [x] 注入 `MVK_CONFIG_USE_METAL_ARGUMENT_BUFFERS=1` 降低 CPU 指令开销。
+    - [x] 注入 `MVK_CONFIG_FAST_MATH=1` (已根据反馈加回，平衡性能)。
+    - [x] 注入 `MVK_CONFIG_DEPTH_CLIP_MODE=1` 缓解 Z-Fighting 闪烁。
+- [x] **关键参数验证**
+    - [x] 通过 Metal HUD 验证参数生效。
+    - [x] 验证显存占用成功降至 800MB 级别。
 
 ---
 

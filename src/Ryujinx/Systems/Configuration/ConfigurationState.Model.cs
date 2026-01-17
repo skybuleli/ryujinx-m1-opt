@@ -578,6 +578,16 @@ namespace Ryujinx.Ava.Systems.Configuration
             public ReactiveObject<bool> EnableTextureRecompression { get; private set; }
 
             /// <summary>
+            /// Enables or disables ASTC hardware passthrough
+            /// </summary>
+            public ReactiveObject<bool> EnableAstcPassthrough { get; private set; }
+
+            /// <summary>
+            /// Enables or disables the Metal Performance HUD
+            /// </summary>
+            public ReactiveObject<bool> ShowMetalHud { get; private set; }
+
+            /// <summary>
             /// Enables or disables Macro high-level emulation
             /// </summary>
             public ReactiveObject<bool> EnableMacroHLE { get; private set; }
@@ -635,6 +645,10 @@ namespace Ryujinx.Ava.Systems.Configuration
                 EnableShaderCache.LogChangesToValue(nameof(EnableShaderCache));
                 EnableTextureRecompression = new ReactiveObject<bool>();
                 EnableTextureRecompression.LogChangesToValue(nameof(EnableTextureRecompression));
+                EnableAstcPassthrough = new ReactiveObject<bool>();
+                EnableAstcPassthrough.LogChangesToValue(nameof(EnableAstcPassthrough));
+                ShowMetalHud = new ReactiveObject<bool>();
+                ShowMetalHud.LogChangesToValue(nameof(ShowMetalHud));
                 GraphicsBackend = new ReactiveObject<GraphicsBackend>();
                 GraphicsBackend.LogChangesToValue(nameof(GraphicsBackend));
                 PreferredGpu = new ReactiveObject<string>();
