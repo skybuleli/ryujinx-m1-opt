@@ -39,6 +39,41 @@
 - **无头测试**: 涉及核心逻辑修改，运行 `Ryujinx.Headless` 进行冒烟测试。
 - **黄金镜像**: 图形渲染修改必须通过黄金镜像对比 (Golden Image Comparison)，确保无视觉回归。
 
+### 5. 特性交付与打包验证 (Delivery & Verification Protocol)
+在完成主要特性开发后，**必须**构建可独立运行的 macOS App Bundle 以进行最终验证。
+
+**标准打包流程 (Shell):**
+```bash
+# 1. 定义变量
+FEATURE_NAME="Feature-Name-Here"
+PUBLISH_DIR="release_output/publish"
+OUTPUT_DIR="release_output/$FEATURE_NAME"
+APP_DIR="$OUTPUT_DIR/Ryujinx.app"
+
+# 2. 构建发布 (OSX-ARM64)
+dotnet publish -c Release -r osx-arm64 --self-contained true -o "$PUBLISH_DIR" src/Ryujinx/Ryujinx.csproj
+
+# 3. 组装应用包
+rm -rf "$APP_DIR" && mkdir -p "$APP_DIR/Contents/"{MacOS,Frameworks,Resources}
+cp "$PUBLISH_DIR/Ryujinx" "$APP_DIR/Contents/MacOS/" && chmod +x "$APP_DIR/Contents/MacOS/Ryujinx"
+cp "$PUBLISH_DIR"/*.dylib "$APP_DIR/Contents/Frameworks/" 2>/dev/null || true
+cp distribution/macos/Info.plist "$APP_DIR/Contents/"
+cp distribution/macos/Ryujinx.icns distribution/macos/updater.sh distribution/legal/THIRDPARTY.md "$APP_DIR/Contents/Resources/"
+echo -n "APPL????" > "$APP_DIR/Contents/PkgInfo"
+
+# 4. 修复依赖路径 (关键!)
+python3 distribution/macos/bundle_fix_up.py "$APP_DIR" MacOS/Ryujinx
+
+# 5. 签名与权限 (支持 JIT)
+# 注意：Entitlements 对性能至关重要
+codesign --entitlements distribution/macos/entitlements.xml --force --deep -s - "$APP_DIR"
+
+# 6. 生成交付文档
+echo "# $FEATURE_NAME Release Notes" > "$OUTPUT_DIR/RELEASE_NOTES.md"
+# (可选) 复制基准测试结果
+# cp -r BenchmarkDotNet.Artifacts/results/* "$OUTPUT_DIR/Benchmarks/"
+```
+
 ## 📝 常用命令速查
 - **构建**: `dotnet build -c Release`
 - **运行无头模式**: `./Ryujinx.Headless --root-data-dir ./portable --frames 100`
