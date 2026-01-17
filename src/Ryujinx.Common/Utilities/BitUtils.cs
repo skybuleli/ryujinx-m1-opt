@@ -32,6 +32,17 @@ namespace Ryujinx.Common
 
         private static ulong ReverseBits64(ulong value)
         {
+            if (System.Runtime.Intrinsics.Arm.ArmBase.IsSupported)
+            {
+                uint low = (uint)value;
+                uint high = (uint)(value >> 32);
+
+                uint rLow = System.Runtime.Intrinsics.Arm.ArmBase.ReverseElementBits(low);
+                uint rHigh = System.Runtime.Intrinsics.Arm.ArmBase.ReverseElementBits(high);
+
+                return ((ulong)rLow << 32) | rHigh;
+            }
+
             value = ((value & 0xaaaaaaaaaaaaaaaa) >> 1) | ((value & 0x5555555555555555) << 1);
             value = ((value & 0xcccccccccccccccc) >> 2) | ((value & 0x3333333333333333) << 2);
             value = ((value & 0xf0f0f0f0f0f0f0f0) >> 4) | ((value & 0x0f0f0f0f0f0f0f0f) << 4);
