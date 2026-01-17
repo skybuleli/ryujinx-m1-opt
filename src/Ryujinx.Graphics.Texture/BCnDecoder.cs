@@ -2,8 +2,10 @@ using Ryujinx.Common;
 using Ryujinx.Common.Memory;
 using System;
 using System.Buffers.Binary;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Intrinsics;
+using System.Runtime.Intrinsics.Arm;
 using System.Runtime.Intrinsics.X86;
 
 namespace Ryujinx.Graphics.Texture
@@ -12,6 +14,14 @@ namespace Ryujinx.Graphics.Texture
     {
         private const int BlockWidth = 4;
         private const int BlockHeight = 4;
+
+        private static readonly Vector128<sbyte> ShiftVec = Vector128.Create(
+            (sbyte)0, 0, 0, 0, -2, -2, -2, -2, -4, -4, -4, -4, -6, -6, -6, -6);
+
+        private static readonly Vector128<byte> MaskVec = Vector128.Create((byte)3);
+
+        private static readonly Vector128<byte> OffsetsVec = Vector128.Create(
+            (byte)0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3);
 
         public static MemoryOwner<byte> DecodeBC1(ReadOnlySpan<byte> data, int width, int height, int depth, int levels, int layers)
         {
@@ -701,6 +711,31 @@ namespace Ryujinx.Graphics.Texture
 
                 outputAsVector128[0] = Ssse3.Shuffle(vClut, indices);
             }
+            else if (AdvSimd.IsSupported)
+            {
+                Vector128<byte> vClut;
+                fixed (byte* pRPal = rPal)
+                {
+                    vClut = AdvSimd.LoadVector128((byte*)pRPal);
+                }
+
+                byte* indicesPtr = stackalloc byte[16];
+                for (int i = 0; i < 16; i++)
+                {
+                    indicesPtr[i] = (byte)(rI & 7);
+                    rI >>= 3;
+                }
+                Vector128<byte> vIndices = AdvSimd.LoadVector128(indicesPtr);
+
+                Vector64<byte> low = AdvSimd.VectorTableLookup(vClut, vIndices.GetLower());
+                Vector64<byte> high = AdvSimd.VectorTableLookup(vClut, vIndices.GetUpper());
+                Vector128<byte> result = Vector128.Create(low, high);
+
+                fixed (byte* pOutput = output)
+                {
+                    AdvSimd.Store(pOutput, result);
+                }
+            }
             else
             {
                 for (int i = 0; i < BlockWidth * BlockHeight; i++, rI >>= 3)
@@ -811,6 +846,63 @@ namespace Ryujinx.Graphics.Texture
 
                 outputAsVector256[0] = Avx2.PermuteVar8x32(vClut, indices0);
                 outputAsVector256[1] = Avx2.PermuteVar8x32(vClut, indices1);
+            }
+            else if (AdvSimd.IsSupported)
+            {
+                Span<Vector128<byte>> outputAsVector128 = MemoryMarshal.Cast<byte, Vector128<byte>>(output);
+
+                Vector128<byte> vClut;
+                fixed (uint* pClut = &clut[0])
+                {
+                    vClut = AdvSimd.LoadVector128((byte*)pClut);
+                }
+
+                uint indices;
+                fixed (byte* pInput = input)
+                {
+                    indices = Unsafe.Read<uint>((void*)(pInput + 4));
+                }
+
+                byte b0 = (byte)indices;
+                byte b1 = (byte)(indices >> 8);
+                byte b2 = (byte)(indices >> 16);
+                byte b3 = (byte)(indices >> 24);
+
+                // Helper to lookup with 128-bit indices by splitting
+                static Vector128<byte> Lookup(Vector128<byte> table, Vector128<byte> idx)
+                {
+                    Vector64<byte> low = AdvSimd.VectorTableLookup(table, idx.GetLower());
+                    Vector64<byte> high = AdvSimd.VectorTableLookup(table, idx.GetUpper());
+                    return Vector128.Create(low, high);
+                }
+
+                // Block 0 (Pixels 0-3)
+                Vector128<byte> idx0 = AdvSimd.ShiftLogical(Vector128.Create(b0).AsSByte(), ShiftVec).AsByte();
+                idx0 = AdvSimd.And(idx0, MaskVec);
+                idx0 = AdvSimd.ShiftLeftLogical(idx0, 2);
+                idx0 = AdvSimd.Add(idx0, OffsetsVec);
+                outputAsVector128[0] = Lookup(vClut, idx0);
+
+                // Block 1 (Pixels 4-7)
+                Vector128<byte> idx1 = AdvSimd.ShiftLogical(Vector128.Create(b1).AsSByte(), ShiftVec).AsByte();
+                idx1 = AdvSimd.And(idx1, MaskVec);
+                idx1 = AdvSimd.ShiftLeftLogical(idx1, 2);
+                idx1 = AdvSimd.Add(idx1, OffsetsVec);
+                outputAsVector128[1] = Lookup(vClut, idx1);
+
+                // Block 2 (Pixels 8-11)
+                Vector128<byte> idx2 = AdvSimd.ShiftLogical(Vector128.Create(b2).AsSByte(), ShiftVec).AsByte();
+                idx2 = AdvSimd.And(idx2, MaskVec);
+                idx2 = AdvSimd.ShiftLeftLogical(idx2, 2);
+                idx2 = AdvSimd.Add(idx2, OffsetsVec);
+                outputAsVector128[2] = Lookup(vClut, idx2);
+
+                // Block 3 (Pixels 12-15)
+                Vector128<byte> idx3 = AdvSimd.ShiftLogical(Vector128.Create(b3).AsSByte(), ShiftVec).AsByte();
+                idx3 = AdvSimd.And(idx3, MaskVec);
+                idx3 = AdvSimd.ShiftLeftLogical(idx3, 2);
+                idx3 = AdvSimd.Add(idx3, OffsetsVec);
+                outputAsVector128[3] = Lookup(vClut, idx3);
             }
             else
             {
