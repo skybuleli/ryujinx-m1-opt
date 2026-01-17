@@ -190,3 +190,6 @@ Prodkeys.NET_v21-0-0/
 *.keys
 Firmware*/
 keys/
+
+# Custom Release Output
+release_output/

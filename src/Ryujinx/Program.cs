@@ -30,6 +30,9 @@ namespace Ryujinx.Ava
 {
     internal partial class Program
     {
+        [DllImport("libc")]
+        private static extern int setenv(string name, string value, int overwrite);
+
         public static double WindowScaleFactor { get; set; }
         public static double DesktopScaleFactor { get; set; } = 1.0;
         public static string Version { get; private set; }
@@ -47,6 +50,19 @@ namespace Ryujinx.Ava
 
         public static int Main(string[] args)
         {
+            if (OperatingSystem.IsMacOS())
+            {
+                // 基础性能注入
+                setenv("MTL_HUD_ENABLED", "1", 1);
+                
+                // MoltenVK 核心优化
+                setenv("MVK_CONFIG_USE_METAL_ARGUMENT_BUFFERS", "1", 1);
+                setenv("MVK_CONFIG_FAST_MATH", "1", 1);
+
+                // 修复 Z-Fighting
+                setenv("MVK_CONFIG_DEPTH_CLIP_MODE", "1", 1);
+            }
+
             Version = ReleaseInformation.Version;
 
             if (OperatingSystem.IsWindows() && !OperatingSystem.IsWindowsVersionAtLeast(10, 0, 19041))
@@ -211,6 +227,11 @@ namespace Ryujinx.Ava
                 if (ConfigurationFileFormat.TryLoad(ConfigurationPath, out ConfigurationFileFormat configurationFileFormat))
                 {
                     ConfigurationState.Instance.Load(configurationFileFormat, ConfigurationPath);
+
+                    if (OperatingSystem.IsMacOS() && ConfigurationState.Instance.Graphics.ShowMetalHud.Value)
+                    {
+                        Environment.SetEnvironmentVariable("MTL_HUD_ENABLED", "1");
+                    }
                 }
                 else
                 {
