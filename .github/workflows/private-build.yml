@@ -1,0 +1,57 @@
+name: Private CI/CD Build
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-macos:
+    name: Build macOS ARM64
+    runs-on: macos-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+          
+      - name: Restore dependencies
+        run: dotnet restore Ryujinx.sln
+        
+      - name: Publish executable
+        run: |
+          dotnet publish src/Ryujinx/Ryujinx.csproj -c Release -r osx-arm64 -o publish_macos --self-contained true -p:PublishReadyToRun=false -p:TieredCompilation=false
+          
+      - name: Create App Bundle
+        run: |
+          mkdir -p Ryujinx.app/Contents/Frameworks Ryujinx.app/Contents/MacOS Ryujinx.app/Contents/Resources
+          cp publish_macos/Ryujinx Ryujinx.app/Contents/MacOS/Ryujinx
+          chmod u+x Ryujinx.app/Contents/MacOS/Ryujinx
+          cp publish_macos/*.dylib Ryujinx.app/Contents/Frameworks/
+          cp distribution/macos/Info.plist Ryujinx.app/Contents/
+          cp distribution/macos/Ryujinx.icns Ryujinx.app/Contents/Resources/
+          cp distribution/macos/updater.sh Ryujinx.app/Contents/Resources/
+          cp publish_macos/THIRDPARTY.md Ryujinx.app/Contents/Resources/
+          echo -n "APPL????" > Ryujinx.app/Contents/PkgInfo
+          
+      - name: Bundle Fixup
+        run: python3 distribution/macos/bundle_fix_up.py Ryujinx.app MacOS/Ryujinx
+        
+      - name: Ad-hoc Sign
+        run: |
+          find Ryujinx.app/Contents/Frameworks -type f -name "*.dylib" -exec codesign --force --sign - {} \;
+          codesign --entitlements distribution/macos/entitlements.xml -f -s - Ryujinx.app
+          
+      - name: Package Artifact
+        run: zip -r Ryujinx-macOS-M1.zip Ryujinx.app
+        
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Ryujinx-macOS-M1
+          path: Ryujinx-macOS-M1.zip
