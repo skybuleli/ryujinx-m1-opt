@@ -13,6 +13,8 @@ namespace Ryujinx.Common
 
         public bool IsCancellationRequested => _cts.IsCancellationRequested;
 
+        public int Count => _queue.Count;
+
         public AsyncWorkQueue(Action<T> callback, string name = null) : this(callback, name, new BlockingCollection<T>())
         {
         }

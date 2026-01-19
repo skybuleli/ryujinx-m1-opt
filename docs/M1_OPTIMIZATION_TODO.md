@@ -51,16 +51,22 @@
 ## 🚀 Phase 2: 流畅 (Smoothness) - P1
 **目标**: 提升帧率稳定性，减少卡顿。
 
-### 2.1 Vulkan Shader Object
+### 2.1 Vulkan Shader Object [BLOCKED]
 - [ ] **扩展支持**
-    - [ ] 检查 MoltenVK 是否支持 `VK_EXT_shader_object` (或等待上游更新)。
-    - [ ] 在 `Ryujinx.Graphics.Vulkan` 后端实现 Shader Object 路径，替代传统的 Pipeline 构建。
-- [ ] **编译优化**
-    - [ ] 实现并行的 Shader 编译队列。
+    - [ ] 检查 MoltenVK 是否支持 `VK_EXT_shader_object` (目前 v1.4.1 尚未完善支持)。
 
-### 2.2 内存预算流式加载 (Memory Budget Streaming)
-- [ ] **资源管理**
-    - [ ] 实现基于权重的纹理逐出策略 (Eviction Policy)。
+### 2.2 Memoryless 瞬态资源 [FAILED]
+- [x] **内存分配优化**
+    - [x] 尝试实现 Memoryless 模式 (因引发花屏和闪退已回滚)。
+
+### 2.3 基于权重的纹理释放 (Weight-based Eviction) ✅
+- [x] **算法实现**
+    - [x] 在 `AutoDeleteCache.cs` 中实现基于体积和最后使用时间的评分系统 (60% 大小权重 + 40% 空闲时间权重)。
+    - [x] 针对 8GB 设备设定更激进的内存水位线 (80% 阈值触发)。
+- [ ] **验证**
+    - [ ] 验证长时间游戏（>1小时）显存占用不反弹。
+- [x] **资源管理**
+    - [x] 实现基于权重的纹理逐出策略 (Eviction Policy) - `CalculateEvictionWeight()` 和 `RemoveTexturesByWeight()`。
     - [ ] 监控 `MTLDevice.currentAllocatedSize`，动态调整缓存池大小。
 
 ---

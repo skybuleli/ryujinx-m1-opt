@@ -192,4 +192,5 @@ Firmware*/
 keys/
 
 # Custom Release Output
-release_output/
+release_output/MoltenVK-macos.tar
+MoltenVK/

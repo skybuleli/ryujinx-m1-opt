@@ -754,7 +754,7 @@ namespace Ryujinx.Graphics.Vulkan
                 hasVectorIndexingBug: IsQualcommProprietary,
                 needsFragmentOutputSpecialization: IsMoltenVk,
                 reduceShaderPrecision: IsMoltenVk,
-                supportsAstcCompression: features2.Features.TextureCompressionAstcLdr && supportsAstcFormats,
+                supportsAstcCompression: (features2.Features.TextureCompressionAstcLdr && supportsAstcFormats) || OperatingSystem.IsMacOS(),
                 supportsBc123Compression: supportsBc123CompressionFormat,
                 supportsBc45Compression: supportsBc45CompressionFormat,
                 supportsBc67Compression: supportsBc67CompressionFormat,

@@ -23,6 +23,7 @@ using Ryujinx.SDL2.Common;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
@@ -59,8 +60,14 @@ namespace Ryujinx.Ava
                 setenv("MVK_CONFIG_USE_METAL_ARGUMENT_BUFFERS", "1", 1);
                 setenv("MVK_CONFIG_FAST_MATH", "1", 1);
 
-                // 修复 Z-Fighting
-                setenv("MVK_CONFIG_DEPTH_CLIP_MODE", "1", 1);
+                // 内存泄漏修复：自动排空 AutoreleasePool (这通常不会导致卡顿，之前的卡顿是GC造成的)
+                setenv("MVK_CONFIG_AUTO_DRAIN_AUTORELEASE_POOLS", "1", 1);
+
+                // 内存优化：使用 Metal Heaps 减少碎片化
+                setenv("MVK_CONFIG_USE_MTL_HEAP", "1", 1);
+
+                // 内存优化：禁止预填充 Command Buffer，节省内存
+                setenv("MVK_CONFIG_PREFILL_METAL_COMMAND_BUFFERS", "0", 1);
             }
 
             Version = ReleaseInformation.Version;

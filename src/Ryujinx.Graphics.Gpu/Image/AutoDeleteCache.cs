@@ -2,6 +2,8 @@ using Ryujinx.Common.Logging;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 
 namespace Ryujinx.Graphics.Gpu.Image
 {
@@ -52,15 +54,28 @@ namespace Ryujinx.Graphics.Gpu.Image
         private ulong MaxTextureSizeCapacity = 4UL * GiB;
         private const ulong MinTextureSizeCapacity = 512 * 1024 * 1024;
         private const ulong DefaultTextureSizeCapacity = 1 * GiB;
-        private const ulong TextureSizeCapacity6GiB = 4 * GiB;
-        private const ulong TextureSizeCapacity8GiB = 6 * GiB;
-        private const ulong TextureSizeCapacity12GiB = 12 * GiB;
+        private const ulong TextureSizeCapacity6GiB = 1UL * GiB;
+        private const ulong TextureSizeCapacity8GiB = 768 * 1024 * 1024; // 768MB for 8GB devices (aggressive)
+        private const ulong TextureSizeCapacity12GiB = 4UL * GiB;
 
-        private const float MemoryScaleFactor = 0.50f;
+        // Weight-based eviction constants for 8GB devices
+        private const float MemoryPressureThreshold = 0.6f;  // Start aggressive eviction at 60% (was 80%)
+        private const float MemoryScaleFactor = 0.25f;
+        
+        // Weight calculation parameters
+        private const float SizeWeight = 0.6f;      // 60% weight for texture size
+        private const float TimeWeight = 0.4f;      // 40% weight for time since last use
+        private const long MaxIdleTimeMs = 30000;   // 30 seconds max idle time for scoring
+        
         private ulong _maxCacheMemoryUsage = DefaultTextureSizeCapacity;
+        private bool _isLowMemoryDevice = false;
 
         private readonly LinkedList<Texture> _textures;
         private ulong _totalSize;
+        
+        // Texture usage tracking for weight-based eviction
+        private readonly Dictionary<Texture, long> _lastUsedTimestamp;
+        private readonly Stopwatch _globalTimer;
 
         private HashSet<ShortTextureCacheEntry> _shortCacheBuilder;
         private HashSet<ShortTextureCacheEntry> _shortCache;
@@ -89,10 +104,12 @@ namespace Ryujinx.Graphics.Gpu.Image
             else if (cpuMemorySizeGiB == 6)
             {
                 MaxTextureSizeCapacity = TextureSizeCapacity6GiB;
+                _isLowMemoryDevice = true;  // Also enable for 6GB devices
             }
             else if (cpuMemorySizeGiB == 8)
             {
                 MaxTextureSizeCapacity = TextureSizeCapacity8GiB;
+                _isLowMemoryDevice = true;  // Enable aggressive eviction for 8GB devices
             }
             else
             {
@@ -103,7 +120,7 @@ namespace Ryujinx.Graphics.Gpu.Image
 
             _maxCacheMemoryUsage = Math.Clamp(cacheMemory, MinTextureSizeCapacity, MaxTextureSizeCapacity);
 
-            Logger.Info?.Print(LogClass.Gpu, $"AutoDelete Cache Allocated VRAM : {_maxCacheMemoryUsage / GiB} GiB");
+            Logger.Info?.Print(LogClass.Gpu, $"AutoDelete Cache Allocated VRAM : {_maxCacheMemoryUsage / GiB} GiB (LowMemoryMode: {_isLowMemoryDevice})");
         }
 
         /// <summary>
@@ -112,6 +129,8 @@ namespace Ryujinx.Graphics.Gpu.Image
         public AutoDeleteCache()
         {
             _textures = [];
+            _lastUsedTimestamp = new Dictionary<Texture, long>();
+            _globalTimer = Stopwatch.StartNew();
 
             _shortCacheBuilder = [];
             _shortCache = [];
@@ -133,11 +152,22 @@ namespace Ryujinx.Graphics.Gpu.Image
 
             texture.IncrementReferenceCount();
             texture.CacheNode = _textures.AddLast(texture);
+            
+            // Track texture usage time
+            _lastUsedTimestamp[texture] = _globalTimer.ElapsedMilliseconds;
 
             if (_textures.Count > MaxCapacity ||
                 (_totalSize > _maxCacheMemoryUsage && _textures.Count >= MinCountForDeletion))
             {
-                RemoveLeastUsedTexture();
+                // Use weight-based eviction on low memory devices
+                if (_isLowMemoryDevice && _totalSize > (ulong)(_maxCacheMemoryUsage * MemoryPressureThreshold))
+                {
+                    RemoveTexturesByWeight();
+                }
+                else
+                {
+                    RemoveLeastUsedTexture();
+                }
             }
         }
 
@@ -159,10 +189,21 @@ namespace Ryujinx.Graphics.Gpu.Image
                     _textures.Remove(texture.CacheNode);
                     _textures.AddLast(texture.CacheNode);
                 }
+                
+                // Update usage timestamp
+                _lastUsedTimestamp[texture] = _globalTimer.ElapsedMilliseconds;
 
                 if (_totalSize > _maxCacheMemoryUsage && _textures.Count >= MinCountForDeletion)
                 {
-                    RemoveLeastUsedTexture();
+                    // Use weight-based eviction on low memory devices under pressure
+                    if (_isLowMemoryDevice && _totalSize > (ulong)(_maxCacheMemoryUsage * MemoryPressureThreshold))
+                    {
+                        RemoveTexturesByWeight();
+                    }
+                    else
+                    {
+                        RemoveLeastUsedTexture();
+                    }
                 }
             }
             else
@@ -178,22 +219,90 @@ namespace Ryujinx.Graphics.Gpu.Image
         {
             Texture oldestTexture = _textures.First.Value;
 
-            _totalSize -= oldestTexture.Size;
+            RemoveTextureInternal(oldestTexture);
+        }
+        
+        /// <summary>
+        /// Calculates the eviction weight for a texture.
+        /// Higher weight = higher priority for eviction.
+        /// Weight is based on texture size and time since last use.
+        /// </summary>
+        /// <param name="texture">The texture to calculate weight for</param>
+        /// <returns>The eviction weight score</returns>
+        private float CalculateEvictionWeight(Texture texture)
+        {
+            long currentTime = _globalTimer.ElapsedMilliseconds;
+            long lastUsed = _lastUsedTimestamp.GetValueOrDefault(texture, 0);
+            long idleTime = currentTime - lastUsed;
+            
+            // Normalize size score (0-1 range, larger = higher score)
+            float sizeScore = (float)texture.Size / (float)MaxTextureSizeCapacity;
+            sizeScore = Math.Min(sizeScore, 1f);
+            
+            // Normalize time score (0-1 range, older = higher score)
+            float timeScore = (float)idleTime / MaxIdleTimeMs;
+            timeScore = Math.Min(timeScore, 1f);
+            
+            // Combined weighted score
+            return (sizeScore * SizeWeight) + (timeScore * TimeWeight);
+        }
+        
+        /// <summary>
+        /// Removes textures based on weight score until memory is under threshold.
+        /// Prioritizes large, old textures for eviction.
+        /// </summary>
+        private void RemoveTexturesByWeight()
+        {
+            ulong targetMemory = (ulong)(_maxCacheMemoryUsage * (MemoryPressureThreshold - 0.1f));
+            
+            // Calculate weights for all textures and sort by highest weight
+            var texturesWithWeights = _textures
+                .Select(t => (Texture: t, Weight: CalculateEvictionWeight(t)))
+                .OrderByDescending(x => x.Weight)
+                .ToList();
+            
+            int removedCount = 0;
+            
+            foreach (var (texture, weight) in texturesWithWeights)
+            {
+                if (_totalSize <= targetMemory || _textures.Count <= MinCountForDeletion)
+                {
+                    break;
+                }
+                
+                RemoveTextureInternal(texture);
+                removedCount++;
+            }
+            
+            if (removedCount > 0)
+            {
+                Logger.Debug?.Print(LogClass.Gpu, $"Weight-based eviction removed {removedCount} textures, memory now: {_totalSize / (1024 * 1024)} MB");
+            }
+        }
+        
+        /// <summary>
+        /// Internal method to remove a texture from the cache.
+        /// </summary>
+        /// <param name="texture">The texture to remove</param>
+        private void RemoveTextureInternal(Texture texture)
+        {
+            _totalSize -= texture.Size;
 
-            if (!oldestTexture.CheckModified(false))
+            if (!texture.CheckModified(false))
             {
                 // The texture must be flushed if it falls out of the auto delete cache.
                 // Flushes out of the auto delete cache do not trigger write tracking,
                 // as it is expected that other overlapping textures exist that have more up-to-date contents.
 
-                oldestTexture.Group.SynchronizeDependents(oldestTexture);
-                oldestTexture.FlushModified(false);
+                texture.Group.SynchronizeDependents(texture);
+                texture.FlushModified(false);
             }
 
-            _textures.RemoveFirst();
+            _textures.Remove(texture.CacheNode);
+            _lastUsedTimestamp.Remove(texture);
 
-            oldestTexture.DecrementReferenceCount();
-            oldestTexture.CacheNode = null;
+            texture.DecrementReferenceCount();
+            texture.CacheNode = null;
         }
 
         /// <summary>
@@ -216,6 +325,7 @@ namespace Ryujinx.Graphics.Gpu.Image
             }
 
             _textures.Remove(texture.CacheNode);
+            _lastUsedTimestamp.Remove(texture);
 
             _totalSize -= texture.Size;
 
