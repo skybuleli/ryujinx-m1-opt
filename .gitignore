@@ -194,3 +194,4 @@ keys/
 # Custom Release Output
 release_output/MoltenVK-macos.tar
 MoltenVK/
+.specstory/
