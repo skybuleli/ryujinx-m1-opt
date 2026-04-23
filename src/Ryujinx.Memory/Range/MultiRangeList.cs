@@ -186,6 +186,15 @@ namespace Ryujinx.Memory.Range
             return result;
         }
 
+        /// <summary>
+        /// Removes all items from the list.
+        /// </summary>
+        public void Clear()
+        {
+            _items.Clear();
+            Count = 0;
+        }
+
         public IEnumerator<T> GetEnumerator()
         {
             return GetList().GetEnumerator();

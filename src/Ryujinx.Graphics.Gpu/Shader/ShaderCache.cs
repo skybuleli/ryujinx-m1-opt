@@ -845,6 +845,28 @@ namespace Ryujinx.Graphics.Gpu.Shader
         }
 
         /// <summary>
+        /// Clears all cached shaders, disposing their resources.
+        /// The cache remains usable after clearing.
+        /// </summary>
+        public void Clear()
+        {
+            foreach (CachedShaderProgram program in _graphicsShaderCache.GetPrograms())
+            {
+                program.Dispose();
+            }
+
+            foreach (CachedShaderProgram program in _computeShaderCache.GetPrograms())
+            {
+                program.Dispose();
+            }
+
+            _graphicsShaderCache.Clear();
+            _computeShaderCache.Clear();
+            _cpPrograms.Clear();
+            _gpPrograms.Clear();
+        }
+
+        /// <summary>
         /// Disposes the shader cache, deleting all the cached shaders.
         /// It's an error to use the shader cache after disposal.
         /// </summary>

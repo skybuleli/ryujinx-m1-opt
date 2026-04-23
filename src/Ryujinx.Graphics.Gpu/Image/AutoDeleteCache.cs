@@ -444,6 +444,19 @@ namespace Ryujinx.Graphics.Gpu.Image
             _shortCacheBuilder = toRemove;
         }
 
+        /// <summary>
+        /// Clears all textures and tracking state from the cache.
+        /// </summary>
+        public void Clear()
+        {
+            _textures.Clear();
+            _totalSize = 0;
+            _lastUsedTimestamp.Clear();
+            _shortCacheBuilder.Clear();
+            _shortCache.Clear();
+            _shortCacheLookup.Clear();
+        }
+
         public IEnumerator<Texture> GetEnumerator()
         {
             return _textures.GetEnumerator();

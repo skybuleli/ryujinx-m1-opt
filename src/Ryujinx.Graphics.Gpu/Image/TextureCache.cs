@@ -1441,6 +1441,31 @@ namespace Ryujinx.Graphics.Gpu.Image
         }
 
         /// <summary>
+        /// Clears all textures from the cache, disposing their resources.
+        /// The cache remains usable after clearing.
+        /// </summary>
+        public void Clear()
+        {
+            _texturesLock.EnterWriteLock();
+
+            try
+            {
+                foreach (Texture texture in _textures)
+                {
+                    texture.Dispose();
+                }
+
+                _textures.Clear();
+                _partiallyMappedTextures.Clear();
+                _cache.Clear();
+            }
+            finally
+            {
+                _texturesLock.ExitWriteLock();
+            }
+        }
+
+        /// <summary>
         /// Disposes all textures and samplers in the cache.
         /// It's an error to use the texture cache after disposal.
         /// </summary>
