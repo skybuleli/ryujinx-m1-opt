@@ -14,7 +14,7 @@ See: .planning/PROJECT.md (updated 2026-04-24)
 
 | Phase | Status | Requirements | Completion |
 |-------|--------|--------------|------------|
-| 1 — 内存止血 | 🔄 Executing | 5 | 25% |
+| 1 — 内存止血 | 🔄 Executing | 5 | 50% |
 | 2 — Metal 基础 | ⚪ Pending | 3 | 0% |
 | 3 — CPU 与 GC 优化 | ⚪ Pending | 4 | 0% |
 | 4 — Shader 优化 | ⚪ Pending | 2 | 0% |
@@ -26,7 +26,8 @@ See: .planning/PROJECT.md (updated 2026-04-24)
 ## Active Work
 
 Phase 1: Plan 01 (Memory Monitoring Infrastructure - MEM-01) completed.
-Remaining: Plans 02-04 in 2 waves.
+Phase 1: Plan 02 (Zero-Allocation Optimization - CPU-03) completed.
+Remaining: Plans 03-04.
 
 ## Blockers
 
@@ -39,6 +40,9 @@ Remaining: Plans 02-04 in 2 waves.
 - 采用细粒度分阶段执行，每阶段可量化验证
 - Moved `IMemoryInfoProvider` to `Ryujinx.Common` to avoid circular dependency with `MemoryBudgetManager`
 - Used Logger event system (`ILogTarget`) for CSV memory log dispatch instead of direct coupling
+- Deleted unused `AstcDecoder.TryDecodeToRgba8(out Span<byte>)` overload (zero callers in src/)
+- LayoutConverter now throws `ArgumentException` on empty output span instead of silently allocating
+- Replaced all remaining `new MemoryStream()` calls in src/ with `MemoryStreamManager.Shared.GetStream()`
 
 ## Metrics
 
@@ -52,10 +56,9 @@ Remaining: Plans 02-04 in 2 waves.
 
 ## Next Actions
 
-1. Execute Plan 02 of Phase 1 (zero-allocation optimization in texture decoders)
-2. Execute Plan 03 of Phase 1 (BenchmarkDotNet micro-benchmarks)
-3. Execute Plan 04 of Phase 1 (RecyclableMemoryStream integration)
-4. Run `/gsd-verify-work 1` after all Phase 1 plans complete
+1. Execute Plan 03 of Phase 1 (BenchmarkDotNet micro-benchmarks)
+2. Execute Plan 04 of Phase 1 (RecyclableMemoryStream integration)
+3. Run `/gsd-verify-work 1` after all Phase 1 plans complete
 
 ---
-*State file updated: 2026-04-24*
+*State file updated: 2026-04-24 after Plan 02 completion*
