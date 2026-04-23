@@ -58,8 +58,8 @@ Next: Run `/gsd-verify-work 1` to validate Phase 1 completion.
 
 ## Next Actions
 
-1. Execute Plan 03 of Phase 1 (RecyclableMemoryStream integration)
-2. Run `/gsd-verify-work 1` after all Phase 1 plans complete
+1. Run `/gsd-verify-work 1` to validate Phase 1 completion
+2. Run `/gsd-discuss-phase 2` to begin Phase 2 (Metal 基础) planning
 
 ---
 *State file updated: 2026-04-24 after Plan 04 completion*
