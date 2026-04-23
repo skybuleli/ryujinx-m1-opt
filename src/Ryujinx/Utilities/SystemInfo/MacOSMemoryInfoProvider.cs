@@ -7,7 +7,7 @@ using System.Runtime.Versioning;
 namespace Ryujinx.Ava.Utilities.SystemInfo
 {
     [SupportedOSPlatform("macos")]
-    partial class MacOSMemoryInfoProvider : IMemoryInfoProvider
+    partial class MacOSMemoryInfoProvider : Ryujinx.Common.Memory.IMemoryInfoProvider
     {
         private const int TASK_BASIC_INFO = 5;
 

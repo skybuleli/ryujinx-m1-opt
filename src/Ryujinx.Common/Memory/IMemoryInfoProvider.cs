@@ -1,6 +1,6 @@
 using Ryujinx.Common.Memory;
 
-namespace Ryujinx.Ava.Utilities.SystemInfo
+namespace Ryujinx.Common.Memory
 {
     public interface IMemoryInfoProvider
     {
