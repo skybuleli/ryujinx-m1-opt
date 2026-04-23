@@ -14,7 +14,7 @@ See: .planning/PROJECT.md (updated 2026-04-24)
 
 | Phase | Status | Requirements | Completion |
 |-------|--------|--------------|------------|
-| 1 — 内存止血 | 🔄 Executing | 5 | 0% |
+| 1 — 内存止血 | 🔄 Executing | 5 | 25% |
 | 2 — Metal 基础 | ⚪ Pending | 3 | 0% |
 | 3 — CPU 与 GC 优化 | ⚪ Pending | 4 | 0% |
 | 4 — Shader 优化 | ⚪ Pending | 2 | 0% |
@@ -25,17 +25,20 @@ See: .planning/PROJECT.md (updated 2026-04-24)
 
 ## Active Work
 
-Phase 1 planned: 4 plans in 2 waves
+Phase 1: Plan 01 (Memory Monitoring Infrastructure - MEM-01) completed.
+Remaining: Plans 02-04 in 2 waves.
 
 ## Blockers
 
-(None)
+- NuGet package sources `git.ryujinx.app` are defunct (404), preventing full solution build on fresh machines. Local `Ryujinx.Common` builds successfully. Does not block Phase 1 execution.
 
 ## Recent Decisions
 
 - 保留 Avalonia UI，专注后端优化
 - 放弃跨平台，专注 macOS Apple Silicon
 - 采用细粒度分阶段执行，每阶段可量化验证
+- Moved `IMemoryInfoProvider` to `Ryujinx.Common` to avoid circular dependency with `MemoryBudgetManager`
+- Used Logger event system (`ILogTarget`) for CSV memory log dispatch instead of direct coupling
 
 ## Metrics
 
@@ -49,9 +52,10 @@ Phase 1 planned: 4 plans in 2 waves
 
 ## Next Actions
 
-1. Run `/gsd-discuss-phase 1` to gather context and clarify approach for Phase 1
-2. Run `/gsd-plan-phase 1` to create detailed execution plan
-3. Run `/gsd-execute-phase 1` to begin implementation
+1. Execute Plan 02 of Phase 1 (zero-allocation optimization in texture decoders)
+2. Execute Plan 03 of Phase 1 (BenchmarkDotNet micro-benchmarks)
+3. Execute Plan 04 of Phase 1 (RecyclableMemoryStream integration)
+4. Run `/gsd-verify-work 1` after all Phase 1 plans complete
 
 ---
 *State file updated: 2026-04-24*

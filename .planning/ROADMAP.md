@@ -24,6 +24,8 @@
 
 **Requirements:** MEM-01, MEM-02, MEM-03, CPU-03, QA-01
 
+**Status:** In Progress | Plan 01 completed (2026-04-24) | 1/4 plans done
+
 **Success Criteria:**
 1. 内存监控系统可实时显示 App Resident Memory（精度 ±10MB）
 2. 空闲状态下内存占用 < 2GB
@@ -32,11 +34,11 @@
 5. BenchmarkDotNet 微基准套件可运行并输出基准数据
 
 **Key Tasks:**
-- 集成 `Microsoft.IO.RecyclableMemoryStream` 全面替换 `MemoryStream`
-- 在 `ARMeilleure`, `Ryujinx.Memory`, `Ryujinx.Graphics.Texture` 中审计并消除堆分配
-- 实现内存预算管理器（Memory Budget Manager）
-- 添加运行时内存统计 API（RSS, Swap, GC Heap）
-- 创建 BCnDecoder / ASTCDecoder 的 BenchmarkDotNet 基准测试
+- ✅ 添加运行时内存统计 API（RSS, Swap, GC Heap）— Plan 01 complete
+- ⬜ 实现内存预算管理器（Memory Budget Manager）— Plan 01 complete
+- ⬜ 集成 `Microsoft.IO.RecyclableMemoryStream` 全面替换 `MemoryStream`
+- ⬜ 在 `ARMeilleure`, `Ryujinx.Memory`, `Ryujinx.Graphics.Texture` 中审计并消除堆分配
+- ⬜ 创建 BCnDecoder / ASTCDecoder 的 BenchmarkDotNet 基准测试
 
 **Duration Estimate:** 2-3 weeks
 **Dependencies:** None
