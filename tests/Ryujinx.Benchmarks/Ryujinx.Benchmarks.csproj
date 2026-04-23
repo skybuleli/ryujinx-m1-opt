@@ -14,6 +14,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Ryujinx.Common\Ryujinx.Common.csproj" />
     <ProjectReference Include="..\..\src\Ryujinx.Graphics.Texture\Ryujinx.Graphics.Texture.csproj" />
+    <ProjectReference Include="..\..\src\Ryujinx.Memory\Ryujinx.Memory.csproj" />
   </ItemGroup>
 
 </Project>
