@@ -50,7 +50,7 @@ namespace Ryujinx.Common.Memory
                     var previousLevel = _currentLevel;
                     _currentLevel = newLevel;
                     PressureChanged?.Invoke(this, new MemoryPressureEventArgs(snapshot, previousLevel));
-                    OnPressureChanged(snapshot, previousLevel);
+                    OnPressureChanged(snapshot, newLevel);
                 }
             }
 
@@ -77,9 +77,9 @@ namespace Ryujinx.Common.Memory
             return MemoryPressureLevel.Normal;
         }
 
-        private void OnPressureChanged(MemorySnapshot snapshot, MemoryPressureLevel previousLevel)
+        private void OnPressureChanged(MemorySnapshot snapshot, MemoryPressureLevel currentLevel)
         {
-            switch (snapshot.PressureLevel)
+            switch (currentLevel)
             {
                 case MemoryPressureLevel.Warning:
                     Logger.Warning?.Print(LogClass.Emulation, $"Memory soft limit exceeded: {snapshot.RssBytes / 1024 / 1024} MB");
