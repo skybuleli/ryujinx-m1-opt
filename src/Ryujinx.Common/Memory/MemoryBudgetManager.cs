@@ -14,10 +14,12 @@ namespace Ryujinx.Common.Memory
 
         public MemorySnapshot LastSnapshot { get; private set; }
         public event EventHandler<MemoryPressureEventArgs> PressureChanged;
+        public event EventHandler<long> SwapPressureDetected;
 
         public const long SoftLimitBytes = 3_500_000_000L;
         public const long HardLimitBytes = 4_000_000_000L;
         public const long OomLimitBytes = 4_500_000_000L;
+        public const long SwapAlertThresholdBytes = 0L;
 
         public MemoryBudgetManager(IMemoryInfoProvider provider, TimeSpan? sampleInterval = null)
             : this(provider, null, sampleInterval)
@@ -52,6 +54,8 @@ namespace Ryujinx.Common.Memory
                     PressureChanged?.Invoke(this, new MemoryPressureEventArgs(snapshot, previousLevel));
                     OnPressureChanged(snapshot, newLevel);
                 }
+
+                CheckSwapPressure(snapshot);
             }
 
             Logger.Info?.Print(LogClass.Emulation, "Memory snapshot", snapshot);
@@ -93,6 +97,17 @@ namespace Ryujinx.Common.Memory
                     Logger.Error?.Print(LogClass.Emulation, $"CRITICAL: Memory OOM limit exceeded: {snapshot.RssBytes / 1024 / 1024} MB — emergency flush");
                     _pressureHandler?.OnOomLimitExceeded();
                     break;
+            }
+        }
+
+        private void CheckSwapPressure(MemorySnapshot snapshot)
+        {
+            if (snapshot.SwapBytes > SwapAlertThresholdBytes)
+            {
+                Logger.Warning?.Print(LogClass.Emulation,
+                    $"Swap pressure detected: {snapshot.SwapBytes / 1024 / 1024} MB (CompressorPageCount). " +
+                    "Target is Swap = 0. Consider closing background applications.");
+                SwapPressureDetected?.Invoke(this, snapshot.SwapBytes);
             }
         }
 
