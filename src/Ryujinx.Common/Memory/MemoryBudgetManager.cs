@@ -7,7 +7,7 @@ namespace Ryujinx.Common.Memory
     public class MemoryBudgetManager : IMemoryTracker, IDisposable
     {
         private readonly IMemoryInfoProvider _provider;
-        private readonly IMemoryPressureHandler _pressureHandler;
+        private IMemoryPressureHandler _pressureHandler;
         private readonly System.Timers.Timer _timer;
         private readonly object _lock = new();
         private MemoryPressureLevel _currentLevel = MemoryPressureLevel.Normal;
@@ -94,6 +94,11 @@ namespace Ryujinx.Common.Memory
                     _pressureHandler?.OnOomLimitExceeded();
                     break;
             }
+        }
+
+        public void SetPressureHandler(IMemoryPressureHandler pressureHandler)
+        {
+            _pressureHandler = pressureHandler;
         }
 
         public void Start()

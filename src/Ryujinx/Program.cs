@@ -18,6 +18,7 @@ using Ryujinx.Common.GraphicsDriver;
 using Ryujinx.Common.Logging;
 using Ryujinx.Common.Memory;
 using Ryujinx.Common.SystemInterop;
+using Ryujinx.Graphics.Gpu;
 using Ryujinx.Graphics.Vulkan.MoltenVK;
 using Ryujinx.Headless;
 using Ryujinx.SDL2.Common;
@@ -165,6 +166,7 @@ namespace Ryujinx.Ava
                 {
                     Logger.Info?.Print(LogClass.Emulation, $"Memory pressure changed: {e.PreviousLevel} -> {e.Snapshot.PressureLevel} (RSS: {e.Snapshot.RssBytes / 1024 / 1024} MB)");
                 };
+                memoryTracker.TrackNativeMemory();
                 memoryTracker.Start();
             }
 
@@ -396,6 +398,17 @@ namespace Ryujinx.Ava
 
             if (isTerminating)
                 Exit();
+        }
+
+        public static void SetGpuContextForMemoryTracking(GpuContext gpuContext)
+        {
+            if (memoryTracker == null || !OperatingSystem.IsMacOS())
+            {
+                return;
+            }
+
+            var pressureHandler = new DefaultMemoryPressureHandler(gpuContext);
+            memoryTracker.SetPressureHandler(pressureHandler);
         }
 
         internal static void Exit()

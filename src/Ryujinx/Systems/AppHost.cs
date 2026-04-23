@@ -962,6 +962,9 @@ namespace Ryujinx.Ava.Systems
                     _viewModel.UiHandler
                 )
             );
+
+            // Wire up memory pressure handler with GPU context.
+            Program.SetGpuContextForMemoryTracking(Device.Gpu);
         }
 
         private static IHardwareDeviceDriver InitializeAudio()
