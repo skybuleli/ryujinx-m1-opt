@@ -4,6 +4,7 @@ using System;
 
 namespace Ryujinx.Benchmarks
 {
+    [Config(typeof(AppleSiliconConfig))]
     [MemoryDiagnoser]
     public class MemoryBlockBenchmarks
     {

@@ -12,11 +12,7 @@ namespace Ryujinx.Benchmarks
     {
         public static void Main(string[] args)
         {
-            var config = ManualConfig.Create(DefaultConfig.Instance)
-                .AddJob(Job.ShortRun
-                    .WithToolchain(InProcessEmitToolchain.Instance));
-
-            BenchmarkRunner.Run<BitUtilsBenchmarks>(config);
+            BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args);
         }
     }
 
