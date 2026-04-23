@@ -16,6 +16,7 @@ using Ryujinx.Common;
 using Ryujinx.Common.Configuration;
 using Ryujinx.Common.GraphicsDriver;
 using Ryujinx.Common.Logging;
+using Ryujinx.Common.Memory;
 using Ryujinx.Common.SystemInterop;
 using Ryujinx.Graphics.Vulkan.MoltenVK;
 using Ryujinx.Headless;
@@ -43,6 +44,7 @@ namespace Ryujinx.Ava
         public static bool PreviewerDetached { get; private set; }
         public static bool UseHardwareAcceleration { get; private set; }
         public static string BackendThreadingArg { get; private set; }
+        private static MemoryBudgetManager memoryTracker;
 
         [LibraryImport("user32.dll", SetLastError = true)]
         public static partial int MessageBoxA(nint hWnd, [MarshalAs(UnmanagedType.LPStr)] string text, [MarshalAs(UnmanagedType.LPStr)] string caption, uint type);
@@ -151,6 +153,20 @@ namespace Ryujinx.Ava
 
             // Initialize the logger system.
             LoggerModule.Initialize();
+
+            // Initialize memory monitoring.
+            if (OperatingSystem.IsMacOS())
+            {
+                var memoryProvider = new MacOSMemoryInfoProvider();
+                memoryTracker = new MemoryBudgetManager(memoryProvider);
+                var csvLogTarget = new CsvMemoryLogTarget(AppDataManager.BaseDirPath);
+                Logger.AddTarget(csvLogTarget);
+                memoryTracker.PressureChanged += (sender, e) =>
+                {
+                    Logger.Info?.Print(LogClass.Emulation, $"Memory pressure changed: {e.PreviousLevel} -> {e.Snapshot.PressureLevel} (RSS: {e.Snapshot.RssBytes / 1024 / 1024} MB)");
+                };
+                memoryTracker.Start();
+            }
 
             // Initialize Discord integration.
             DiscordIntegrationModule.Initialize();
@@ -384,6 +400,11 @@ namespace Ryujinx.Ava
 
         internal static void Exit()
         {
+            if (memoryTracker != null)
+            {
+                memoryTracker.Dispose();
+            }
+
             DiscordIntegrationModule.Exit();
 
             Logger.Shutdown();
