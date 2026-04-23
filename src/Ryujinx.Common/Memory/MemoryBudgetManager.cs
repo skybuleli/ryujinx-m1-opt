@@ -7,6 +7,7 @@ namespace Ryujinx.Common.Memory
     public class MemoryBudgetManager : IMemoryTracker, IDisposable
     {
         private readonly IMemoryInfoProvider _provider;
+        private readonly IMemoryPressureHandler _pressureHandler;
         private readonly System.Timers.Timer _timer;
         private readonly object _lock = new();
         private MemoryPressureLevel _currentLevel = MemoryPressureLevel.Normal;
@@ -14,13 +15,19 @@ namespace Ryujinx.Common.Memory
         public MemorySnapshot LastSnapshot { get; private set; }
         public event EventHandler<MemoryPressureEventArgs> PressureChanged;
 
-        private const long SoftLimitBytes = 3_500_000_000L;
-        private const long HardLimitBytes = 4_000_000_000L;
-        private const long OomLimitBytes = 4_500_000_000L;
+        public const long SoftLimitBytes = 3_500_000_000L;
+        public const long HardLimitBytes = 4_000_000_000L;
+        public const long OomLimitBytes = 4_500_000_000L;
 
         public MemoryBudgetManager(IMemoryInfoProvider provider, TimeSpan? sampleInterval = null)
+            : this(provider, null, sampleInterval)
+        {
+        }
+
+        public MemoryBudgetManager(IMemoryInfoProvider provider, IMemoryPressureHandler pressureHandler, TimeSpan? sampleInterval = null)
         {
             _provider = provider;
+            _pressureHandler = pressureHandler;
             _timer = new Timer(sampleInterval?.TotalMilliseconds ?? 1000.0)
             {
                 AutoReset = true,
@@ -40,8 +47,10 @@ namespace Ryujinx.Common.Memory
 
                 if (newLevel != _currentLevel)
                 {
-                    PressureChanged?.Invoke(this, new MemoryPressureEventArgs(snapshot, _currentLevel));
+                    var previousLevel = _currentLevel;
                     _currentLevel = newLevel;
+                    PressureChanged?.Invoke(this, new MemoryPressureEventArgs(snapshot, previousLevel));
+                    OnPressureChanged(snapshot, previousLevel);
                 }
             }
 
@@ -66,6 +75,25 @@ namespace Ryujinx.Common.Memory
             }
 
             return MemoryPressureLevel.Normal;
+        }
+
+        private void OnPressureChanged(MemorySnapshot snapshot, MemoryPressureLevel previousLevel)
+        {
+            switch (snapshot.PressureLevel)
+            {
+                case MemoryPressureLevel.Warning:
+                    Logger.Warning?.Print(LogClass.Emulation, $"Memory soft limit exceeded: {snapshot.RssBytes / 1024 / 1024} MB");
+                    GC.Collect(2, GCCollectionMode.Optimized, blocking: false);
+                    break;
+                case MemoryPressureLevel.Critical:
+                    Logger.Error?.Print(LogClass.Emulation, $"Memory hard limit exceeded: {snapshot.RssBytes / 1024 / 1024} MB — evicting caches");
+                    _pressureHandler?.OnHardLimitExceeded();
+                    break;
+                case MemoryPressureLevel.Oom:
+                    Logger.Error?.Print(LogClass.Emulation, $"CRITICAL: Memory OOM limit exceeded: {snapshot.RssBytes / 1024 / 1024} MB — emergency flush");
+                    _pressureHandler?.OnOomLimitExceeded();
+                    break;
+            }
         }
 
         public void Start()
