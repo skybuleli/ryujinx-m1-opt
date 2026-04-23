@@ -24,7 +24,7 @@
 
 **Requirements:** MEM-01, MEM-02, MEM-03, CPU-03, QA-01
 
-**Status:** In Progress | Plans 01-02 completed (2026-04-24) | 2/4 plans done
+**Status:** In Progress | Plans 01-02, 04 completed (2026-04-24) | 3/4 plans done
 
 **Success Criteria:**
 1. 内存监控系统可实时显示 App Resident Memory（精度 ±10MB）
@@ -38,7 +38,7 @@
 - ⬜ 实现内存预算管理器（Memory Budget Manager）— Plan 01 complete
 - ⬜ 集成 `Microsoft.IO.RecyclableMemoryStream` 全面替换 `MemoryStream`
 - ✅ 在 `Ryujinx.Graphics.Texture` 中消除 AstcDecoder 和 LayoutConverter 堆分配 — Plan 02 complete
-- ⬜ 创建 BCnDecoder / ASTCDecoder 的 BenchmarkDotNet 基准测试
+- ✅ 创建 BCnDecoder / ASTCDecoder / ETC2Decoder / MemoryBlock 的 BenchmarkDotNet 基准测试 — Plan 04 complete
 
 **Duration Estimate:** 2-3 weeks
 **Dependencies:** None
@@ -257,4 +257,4 @@
 
 ---
 *Roadmap created: 2026-04-24*
-*Last updated: 2026-04-24 after Plan 02 completion*
+*Last updated: 2026-04-24 after Plan 04 completion*
