@@ -14,7 +14,7 @@ See: .planning/PROJECT.md (updated 2026-04-24)
 
 | Phase | Status | Requirements | Completion |
 |-------|--------|--------------|------------|
-| 1 — 内存止血 | 🔄 Executing | 5 | 75% |
+| 1 — 内存止血 | ✅ Complete | 5 | 100% |
 | 2 — Metal 基础 | ⚪ Pending | 3 | 0% |
 | 3 — CPU 与 GC 优化 | ⚪ Pending | 4 | 0% |
 | 4 — Shader 优化 | ⚪ Pending | 2 | 0% |
@@ -25,10 +25,8 @@ See: .planning/PROJECT.md (updated 2026-04-24)
 
 ## Active Work
 
-Phase 1: Plan 01 (Memory Monitoring Infrastructure - MEM-01) completed.
-Phase 1: Plan 02 (Zero-Allocation Optimization - CPU-03) completed.
-Phase 1: Plan 04 (BenchmarkDotNet Suite - QA-01) completed.
-Remaining: Plan 03.
+Phase 1: All plans completed (Plans 01-04).
+Next: Run `/gsd-verify-work 1` to validate Phase 1 completion.
 
 ## Blockers
 
@@ -44,6 +42,9 @@ Remaining: Plan 03.
 - Deleted unused `AstcDecoder.TryDecodeToRgba8(out Span<byte>)` overload (zero callers in src/)
 - LayoutConverter now throws `ArgumentException` on empty output span instead of silently allocating
 - Replaced all remaining `new MemoryStream()` calls in src/ with `MemoryStreamManager.Shared.GetStream()`
+- Avoided circular dependency between Ryujinx.Common and Ryujinx.Memory by placing TrackNativeMemory as extension method in Ryujinx project
+- Used SetPressureHandler late-binding pattern because GpuContext is created in Switch.cs, not Program.cs
+- Added Clear() methods to TextureCache and ShaderCache instead of disposing and recreating
 
 ## Metrics
 

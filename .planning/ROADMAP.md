@@ -24,7 +24,7 @@
 
 **Requirements:** MEM-01, MEM-02, MEM-03, CPU-03, QA-01
 
-**Status:** In Progress | Plans 01-02, 04 completed (2026-04-24) | 3/4 plans done
+**Status:** ✅ Complete | All 4 plans completed (2026-04-24)
 
 **Success Criteria:**
 1. 内存监控系统可实时显示 App Resident Memory（精度 ±10MB）
@@ -35,8 +35,8 @@
 
 **Key Tasks:**
 - ✅ 添加运行时内存统计 API（RSS, Swap, GC Heap）— Plan 01 complete
-- ⬜ 实现内存预算管理器（Memory Budget Manager）— Plan 01 complete
-- ⬜ 集成 `Microsoft.IO.RecyclableMemoryStream` 全面替换 `MemoryStream`
+- ✅ 实现内存预算管理器（Memory Budget Manager）— Plan 03 complete
+- ✅ 集成 `Microsoft.IO.RecyclableMemoryStream` 全面替换 `MemoryStream` — Plan 02 complete
 - ✅ 在 `Ryujinx.Graphics.Texture` 中消除 AstcDecoder 和 LayoutConverter 堆分配 — Plan 02 complete
 - ✅ 创建 BCnDecoder / ASTCDecoder / ETC2Decoder / MemoryBlock 的 BenchmarkDotNet 基准测试 — Plan 04 complete
 
