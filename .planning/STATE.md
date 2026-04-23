@@ -1,7 +1,7 @@
 # State: SwitchPro
 
 **Updated:** 2026-04-24
-**Status:** Initialized — Ready for Phase 1
+**Status:** 🔄 Executing Phase 1
 
 ## Project Reference
 
@@ -14,7 +14,7 @@ See: .planning/PROJECT.md (updated 2026-04-24)
 
 | Phase | Status | Requirements | Completion |
 |-------|--------|--------------|------------|
-| 1 — 内存止血 | 🔴 Not Started | 5 | 0% |
+| 1 — 内存止血 | 🔄 Executing | 5 | 0% |
 | 2 — Metal 基础 | ⚪ Pending | 3 | 0% |
 | 3 — CPU 与 GC 优化 | ⚪ Pending | 4 | 0% |
 | 4 — Shader 优化 | ⚪ Pending | 2 | 0% |
@@ -25,7 +25,7 @@ See: .planning/PROJECT.md (updated 2026-04-24)
 
 ## Active Work
 
-(None — awaiting Phase 1 start)
+Phase 1 planned: 4 plans in 2 waves
 
 ## Blockers
 
