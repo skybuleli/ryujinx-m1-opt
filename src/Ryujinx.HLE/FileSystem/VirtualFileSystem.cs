@@ -14,6 +14,7 @@ using LibHac.Tools.Fs;
 using LibHac.Tools.FsSystem;
 using Ryujinx.Common.Configuration;
 using Ryujinx.Common.Logging;
+using Ryujinx.Common.Memory;
 using Ryujinx.HLE.HOS;
 using System;
 using System.Buffers.Text;
@@ -285,7 +286,7 @@ namespace Ryujinx.HLE.FileSystem
                     if (result.IsFailure() || bytesRead != ticketData.Length)
                         continue;
 
-                    Ticket ticket = new(new MemoryStream(ticketData));
+                    Ticket ticket = new(MemoryStreamManager.Shared.GetStream(ticketData));
                     byte[] titleKey = ticket.GetTitleKey(KeySet);
 
                     if (titleKey != null)

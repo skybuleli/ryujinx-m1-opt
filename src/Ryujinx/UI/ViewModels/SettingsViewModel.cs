@@ -17,6 +17,7 @@ using Ryujinx.Ava.UI.Models.Input;
 using Ryujinx.Ava.UI.Windows;
 using Ryujinx.Common.Configuration;
 using Ryujinx.Common.Configuration.Multiplayer;
+using Ryujinx.Common.Memory;
 using Ryujinx.Common.GraphicsDriver;
 using Ryujinx.Common.Helper;
 using Ryujinx.Common.Logging;
@@ -451,7 +452,7 @@ namespace Ryujinx.Ava.UI.ViewModels
 
             if (gameIconData != null && gameIconData.Length > 0)
             {
-                using var ms = new MemoryStream(gameIconData);
+                using var ms = MemoryStreamManager.Shared.GetStream(gameIconData);
                 _gameIcon = new Bitmap(ms);
             }
 
