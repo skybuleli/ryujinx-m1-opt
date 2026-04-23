@@ -17,6 +17,16 @@ namespace Ryujinx.Memory
         private nint _pointer;
 
         /// <summary>
+        /// Fired when native memory is committed.
+        /// </summary>
+        public static event EventHandler<long> NativeMemoryCommitted;
+
+        /// <summary>
+        /// Fired when native memory is decommitted.
+        /// </summary>
+        public static event EventHandler<long> NativeMemoryDecommitted;
+
+        /// <summary>
         /// Pointer to the memory block data.
         /// </summary>
         public nint Pointer => _pointer;
@@ -106,6 +116,7 @@ namespace Ryujinx.Memory
         public void Commit(ulong offset, ulong size)
         {
             MemoryManagement.Commit(GetPointerInternal(offset, size), size, _forJit);
+            NativeMemoryCommitted?.Invoke(null, (long)size);
         }
 
         /// <summary>
@@ -120,6 +131,7 @@ namespace Ryujinx.Memory
         public void Decommit(ulong offset, ulong size)
         {
             MemoryManagement.Decommit(GetPointerInternal(offset, size), size);
+            NativeMemoryDecommitted?.Invoke(null, (long)size);
         }
 
         /// <summary>
