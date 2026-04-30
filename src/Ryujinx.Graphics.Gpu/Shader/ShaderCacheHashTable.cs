@@ -278,5 +278,20 @@ namespace Ryujinx.Graphics.Gpu.Shader
                 }
             }
         }
+
+        /// <summary>
+        /// Clears all programs and guest code IDs from the cache.
+        /// </summary>
+        public void Clear()
+        {
+            _vertexACache.Initialize();
+            _vertexBCache.Initialize();
+            _tessControlCache.Initialize();
+            _tessEvaluationCache.Initialize();
+            _geometryCache.Initialize();
+            _fragmentCache.Initialize();
+
+            _shaderPrograms.Clear();
+        }
     }
 }

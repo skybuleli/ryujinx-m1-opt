@@ -220,31 +220,6 @@ namespace Ryujinx.Graphics.Texture.Astc
 
         public static bool TryDecodeToRgba8(
             ReadOnlyMemory<byte> data,
-            int blockWidth,
-            int blockHeight,
-            int width,
-            int height,
-            int depth,
-            int levels,
-            int layers,
-            out Span<byte> decoded)
-        {
-            byte[] output = new byte[QueryDecompressedSize(width, height, depth, levels, layers)];
-
-            AstcDecoder decoder = new(data, output, blockWidth, blockHeight, width, height, depth, levels, layers);
-
-            for (int i = 0; i < decoder.TotalBlockCount; i++)
-            {
-                decoder.ProcessBlock(i);
-            }
-
-            decoded = output;
-
-            return decoder.Success;
-        }
-
-        public static bool TryDecodeToRgba8(
-            ReadOnlyMemory<byte> data,
             Memory<byte> outputBuffer,
             int blockWidth,
             int blockHeight,

@@ -1,4 +1,5 @@
 using Ryujinx.Common;
+using Ryujinx.Common.Memory;
 using Ryujinx.Cpu;
 using Ryujinx.HLE.HOS.Ipc;
 using Ryujinx.HLE.HOS.Services.Time.Clock;
@@ -419,7 +420,7 @@ namespace Ryujinx.HLE.HOS.Services.Time
 
             context.Memory.Read(ipcDesc.Position, temp);
 
-            using BinaryReader bufferReader = new(new MemoryStream(temp));
+            using BinaryReader bufferReader = new(MemoryStreamManager.Shared.GetStream(temp));
 
             return bufferReader.ReadStruct<ClockSnapshot>();
         }

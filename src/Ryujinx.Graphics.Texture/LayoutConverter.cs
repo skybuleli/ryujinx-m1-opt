@@ -389,7 +389,9 @@ namespace Ryujinx.Graphics.Texture
         {
             if (output.Length == 0)
             {
-                output = new byte[sizeInfo.TotalSize];
+                throw new ArgumentException(
+                    "Output buffer must be pre-allocated. Use MemoryOwner<byte>.Rent(size) or provide a valid Span<byte>.",
+                    nameof(output));
             }
 
             int inOffs = 0;
@@ -551,7 +553,9 @@ namespace Ryujinx.Graphics.Texture
 
             if (output.Length == 0)
             {
-                output = new byte[h * stride];
+                throw new ArgumentException(
+                    "Output buffer must be pre-allocated. Use MemoryOwner<byte>.Rent(size) or provide a valid Span<byte>.",
+                    nameof(output));
             }
 
             int inOffs = 0;

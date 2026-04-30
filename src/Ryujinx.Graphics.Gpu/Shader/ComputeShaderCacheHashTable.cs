@@ -67,5 +67,14 @@ namespace Ryujinx.Graphics.Gpu.Shader
                 yield return program;
             }
         }
+
+        /// <summary>
+        /// Clears all programs from the cache.
+        /// </summary>
+        public void Clear()
+        {
+            _cache.Clear();
+            _shaderPrograms.Clear();
+        }
     }
 }

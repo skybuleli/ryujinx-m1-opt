@@ -240,5 +240,13 @@ namespace Ryujinx.Graphics.Gpu.Shader.HashTable
             data = null;
             return false;
         }
+
+        /// <summary>
+        /// Removes all items from the table.
+        /// </summary>
+        public void Clear()
+        {
+            _sizeTable.Clear();
+        }
     }
 }

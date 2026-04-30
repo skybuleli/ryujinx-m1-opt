@@ -5,6 +5,7 @@ using System;
 
 namespace Ryujinx.Benchmarks
 {
+    [Config(typeof(AppleSiliconConfig))]
     [MemoryDiagnoser]
     public class BCnDecoderBenchmarks
     {
@@ -40,6 +41,37 @@ namespace Ryujinx.Benchmarks
              
              int bc1Size = (_width * _height) / 2;
              using MemoryOwner<byte> result = BCnDecoder.DecodeBC1(_data.AsSpan().Slice(0, bc1Size), _width, _height, 1, 1, 1);
+        }
+
+        [Benchmark]
+        public void DecodeBC2()
+        {
+            using MemoryOwner<byte> result = BCnDecoder.DecodeBC2(_data, _width, _height, 1, 1, 1);
+        }
+
+        [Benchmark]
+        public void DecodeBC4()
+        {
+            int bc4Size = (_width * _height) / 2;
+            using MemoryOwner<byte> result = BCnDecoder.DecodeBC4(_data.AsSpan().Slice(0, bc4Size), _width, _height, 1, 1, 1, signed: false);
+        }
+
+        [Benchmark]
+        public void DecodeBC5()
+        {
+            using MemoryOwner<byte> result = BCnDecoder.DecodeBC5(_data, _width, _height, 1, 1, 1, signed: false);
+        }
+
+        [Benchmark]
+        public void DecodeBC6()
+        {
+            using MemoryOwner<byte> result = BCnDecoder.DecodeBC6(_data, _width, _height, 1, 1, 1, signed: false);
+        }
+
+        [Benchmark]
+        public void DecodeBC7()
+        {
+            using MemoryOwner<byte> result = BCnDecoder.DecodeBC7(_data, _width, _height, 1, 1, 1);
         }
     }
 }
